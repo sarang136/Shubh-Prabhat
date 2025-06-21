@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import mb from '../assets/mb.png';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { useGetAllNewsQuery, useDeleteNewsMutation, useUpdateNewsMutation } from '../Redux/post';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
+import { useGetAllNewsQuery, useUpdateNewsMutation } from '../Redux/newsAPI.js';
+import { useDeleteNewsMutation } from '../Redux/newsAPI.js';
 
 const TotalNews = () => {
   const { data: newsList, isLoading, isError } = useGetAllNewsQuery("6853b28ec12e9e89dc1cf37a");
   const [deleteNews] = useDeleteNewsMutation();
-  const [updateNews] = useUpdateNewsMutation();
+  const [updateNews, {isLoading: loading}] = useUpdateNewsMutation();
   const { user } = useSelector((state) => state.auth);
   const reporterId = user?.reporter?._id;
 
@@ -234,7 +235,7 @@ const TotalNews = () => {
                   type="submit"
                   className="bg-[#12294A] text-white px-6 py-2 rounded"
                 >
-                  Update
+                  {loading ? "Updating" : "Update"}
                 </button>
               </div>
             </form>

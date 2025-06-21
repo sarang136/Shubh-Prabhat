@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUpload } from 'react-icons/fi';
-import {
-  useGetAllCategoriesQuery,
-  useGetAllSubCategoriesQuery,
-  useAddNewsMutation,
-} from '../Redux/post';
+
+import { useAddNewsMutation } from '../Redux/newsAPI.js';
+import { useGetAllCategoriesQuery, useGetAllSubCategoriesQuery } from '../Redux/Categories.js';
 
 const News = () => {
   const navigate = useNavigate();
 
   const { data: categoryData, isLoading, isError } = useGetAllCategoriesQuery("6853b28ec12e9e89dc1cf37a");
   const { data: subCategoriesData } = useGetAllSubCategoriesQuery("6853b28ec12e9e89dc1cf37a");
-  const [addNews] = useAddNewsMutation();
+  const [addNews, {isLoading: loading}] = useAddNewsMutation();
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(""); 
@@ -118,6 +116,7 @@ const News = () => {
               <input
                 type="file"
                 name="image"
+
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => setImage(e.target.files[0])}
@@ -127,7 +126,7 @@ const News = () => {
 
           <div className='text-center'>
             <button type="submit" className="bg-[#12294A] text-white px-6 py-2 rounded hover:bg-[#0e1f3a]">
-              + Add News
+              {loading ? "Adding" : "Add News"}
             </button>
           </div>
         </form>

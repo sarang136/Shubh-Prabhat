@@ -3,6 +3,7 @@ import { FaUserCircle, FaBars, FaUser } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useLogoutMutation } from '../Redux/post';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Navbar = ({ toggleSidebar }) => {
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
@@ -16,16 +17,22 @@ const Navbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    navigate('/signin');
-    try {
-      await logout({ token }).unwrap();
-      localStorage.clear();
+    setIsProfileSidebarOpen(false);
 
-    } catch (err) {
-      console.error('Logout failed:', err);
-      // alert('Logout failed. Try again.');
-    }
+    setTimeout(async () => {
+      toast.success("Logout Successful");
+      navigate('/signin');
+
+      try {
+        await logout({ token }).unwrap();
+        localStorage.clear();
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
+    }, 300);
   };
+
+
 
   return (
     <div className="relative w-full font-marathi bg-[#12294A]">

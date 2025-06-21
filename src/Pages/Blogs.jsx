@@ -4,7 +4,7 @@ import {
   useGetPendingBlogsQuery,
   useDeleteBlogMutation,
   useUpdateBlogMutation
-} from '../Redux/post';
+} from '../Redux/BlogsApi';
 import { useSelector } from 'react-redux';
 import { MdDelete } from 'react-icons/md';
 import { toast } from 'react-toastify';
@@ -33,12 +33,14 @@ const Blogs = () => {
   const reporterId = auth?.user?.reporter?._id;
   const shopId = auth?.user?.shop?._id;
 
-  const [addBlogs] = useAddBlogsMutation();
+  const [addBlogs, { isLoading: loading }] = useAddBlogsMutation();
   const [deleteBlog] = useDeleteBlogMutation();
-  const [updateBlog] = useUpdateBlogMutation();
+  const [updateBlog, { isLoading }] = useUpdateBlogMutation();
   const { data: pendingBlogs } = useGetPendingBlogsQuery(reporterId, {
     skip: !reporterId,
   });
+
+  const totalBlogCount = pendingBlogs?.data?.length || 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,16 +70,20 @@ const Blogs = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this blog?')) {
-      try {
-        await deleteBlog(id).unwrap();
-        toast.success('Blog deleted successfully.');
-      } catch (err) {
-        toast.error('Failed to delete blog.');
-      }
+ const handleDelete = async (id) => {
+  if (window.confirm('Are you sure you want to delete this blog?')) {
+    try {
+      await deleteBlog(id).unwrap();     
+      toast.success('Blog deleted successfully.');
+      // refetch();                         
+    } catch (err) {
+      toast.error('Failed to delete blog.');
+      console.error('Delete error:', err); 
     }
-  };
+  }
+};
+
+
 
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
@@ -112,7 +118,9 @@ const Blogs = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between mb-4">
-        <p className="font-bold text-2xl flex items-center">Total Blogs</p>
+        <p className="font-bold text-2xl flex items-center">
+          Total Blogs <span className="ml-2 text-2xl text-gray-500">({totalBlogCount})</span>
+        </p>
         <button
           onClick={() => setIsModalOpen(true)}
           className="px-6 py-2 border rounded-lg bg-[#12294A] text-white"
@@ -204,7 +212,11 @@ const Blogs = () => {
               <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} className="w-full" />
               <div className="flex justify-between">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">Add Blog</button>
+                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">
+
+                  {loading ? "Adding" : "Add Blog"}
+
+                </button>
               </div>
             </form>
           </div>
@@ -216,14 +228,20 @@ const Blogs = () => {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md space-y-4">
             <h2 className="text-xl font-bold">Update Blog</h2>
-            <form onSubmit={handleUpdateSubmit} className="space-y-4">
+            <form onSubmit={handleUpdateSubmit} className="space-y-">
+              <label className='text-gray-400'>Main Headline</label>
               <input type="text" value={selectedBlog.MainHeadline} onChange={(e) => setSelectedBlog({ ...selectedBlog, MainHeadline: e.target.value })} className="w-full p-2 border rounded" />
+               <label className='text-gray-400'>Sub Headline</label>
               <input type="text" value={selectedBlog.Subheadline} onChange={(e) => setSelectedBlog({ ...selectedBlog, Subheadline: e.target.value })} className="w-full p-2 border rounded" />
+              <label className='text-gray-400'>Description</label>
               <textarea value={selectedBlog.Description} onChange={(e) => setSelectedBlog({ ...selectedBlog, Description: e.target.value })} className="w-full p-2 border rounded h-24 resize-none" />
+                <label className='text-gray-400'>Image</label>
               <input type="file" accept="image/*" onChange={(e) => setSelectedBlog({ ...selectedBlog, newImage: e.target.files[0] })} className="w-full" />
               <div className="flex justify-between">
                 <button type="button" onClick={() => setIsUpdateModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">Update</button>
+                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">
+                  {isLoading ? "Updating" : "Update"}
+                </button>
               </div>
             </form>
           </div>

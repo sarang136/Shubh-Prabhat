@@ -3,8 +3,8 @@ import { HiOutlineDocumentText } from 'react-icons/hi';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { MdPendingActions } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { useGetAllNewsQuery } from '../Redux/post';
 import { useSelector } from 'react-redux';
+import { useGetAllNewsQuery } from '../Redux/newsAPI';
 
 
 const Dashboard = () => {
