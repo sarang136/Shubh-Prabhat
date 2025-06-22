@@ -1,138 +1,164 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FiUpload } from 'react-icons/fi';
+import React, { useState } from "react";
+import { FiUpload } from "react-icons/fi";
+import { useSelector } from "react-redux";
+import {
+  useGetAllCategoriesQuery,
+  useGetAllSubCategoriesQuery,
+} from "../Redux/Categories";
+import { useAddNewsMutation } from "../Redux/newsAPI";
 
-import { useAddNewsMutation } from '../Redux/newsAPI.js';
-import { useGetAllCategoriesQuery, useGetAllSubCategoriesQuery } from '../Redux/Categories.js';
+const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
+  const { data: categoryData = [] } = useGetAllCategoriesQuery();
+  const [selectedCategoryId, setSelectedCategoryId] = useState(defaultValues.serviceId || "");
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(defaultValues.subcategoryId || "");
+  const [mainHeadline, setMainHeadline] = useState(defaultValues.MainHeadline || "");
+  const [subheadline, setSubheadline] = useState(defaultValues.Subheadline || "");
+  const [description, setDescription] = useState(defaultValues.Description || "");
+  const [imageFile, setImageFile] = useState(null);
 
-const News = () => {
-  const navigate = useNavigate();
+  const auth = useSelector((state) => state.auth);
+  const reporterId = auth?.user?.reporter?._id;
 
-  const { data: categoryData, isLoading, isError } = useGetAllCategoriesQuery("6853b28ec12e9e89dc1cf37a");
-  const { data: subCategoriesData } = useGetAllSubCategoriesQuery("6853b28ec12e9e89dc1cf37a");
-  const [addNews, {isLoading: loading}] = useAddNewsMutation();
+  const { data: subCategoryData, isFetching } = useGetAllSubCategoriesQuery(
+    selectedCategoryId,
+    { skip: !selectedCategoryId }
+  );
+  const subcategories = subCategoryData?.product?.subcategories || [];
 
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(""); 
-  const [headline, setHeadline] = useState("");
-  const [subHeadline, setSubHeadline] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState(null);
-
-  const serviceId = "68513056fa94f06bda5bbc45";
-  const reporterId = "6853b28ec12e9e89dc1cf37a";
-
-  const categories = Array.isArray(categoryData) ? categoryData : [];
-  const subCategories = Array.isArray(subCategoriesData?.subcategories) ? subCategoriesData?.subcategories : [];
+  const [addNews, { isLoading }] = useAddNewsMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!selectedCategory || !selectedSubCategoryId || !headline || !description || !image) {
-      alert("Please fill all required fields.");
+    if (
+      !selectedCategoryId ||
+      !selectedSubCategoryId ||
+      !mainHeadline ||
+      !subheadline ||
+      !description ||
+      !imageFile ||
+      !reporterId
+    ) {
+      alert("Please fill all fields.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("serviceId", serviceId);
+    formData.append("serviceId", selectedCategoryId);
     formData.append("subcategoryId", selectedSubCategoryId);
-    formData.append("MainHeadline", headline);
-    formData.append("Subheadline", subHeadline);
+    formData.append("MainHeadline", mainHeadline);
+    formData.append("Subheadline", subheadline);
     formData.append("Description", description);
-    formData.append("reporterId", reporterId);
-    formData.append("image", image);
+    formData.append("image", imageFile);
+    formData.append("reporterId", reporterId); 
 
     try {
       await addNews(formData).unwrap();
-      navigate('/dashboard');
+      alert("News added successfully!");
+      // Resetting form (optional)
+      setSelectedCategoryId("");
+      setSelectedSubCategoryId("");
+      setMainHeadline("");
+      setSubheadline("");
+      setDescription("");
+      setImageFile(null);
     } catch (error) {
       console.error("Failed to add news:", error);
-      alert("Something went wrong while adding the news.");
+      alert("Something went wrong.");
     }
   };
 
   return (
-    <div className='p-6 bg-gray-100 font-marathi min-h-screen flex justify-center'>
-      <div className='w-full max-w-xl bg-white p-6 shadow-md'>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="h-[85vh] flex items-center justify-center bg-gray-100 font-tiro">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-10 rounded shadow-md max-w-4xl w-6/12 grid grid-cols-1 md:grid-cols-2 gap-6"
+        encType="multipart/form-data"
+      >
+        <select
+          value={selectedCategoryId}
+          onChange={(e) => {
+            setSelectedCategoryId(e.target.value);
+            setSelectedSubCategoryId("");
+          }}
+          className="border border-gray-300 p-2 rounded"
+        >
+          <option value="">Select Category</option>
+          {categoryData.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
 
-          <div className='flex gap-4'>
-            <select
-              name="category"
-              className="w-full p-3 border rounded"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="" disabled>Select Category</option>
-              {categories.map((item) => (
-                <option key={item._id} value={item.name}>{item.name}</option>
-              ))}
-            </select>
+        <select
+          value={selectedSubCategoryId}
+          onChange={(e) => setSelectedSubCategoryId(e.target.value)}
+          className="border border-gray-300 p-2 rounded"
+          disabled={!selectedCategoryId || isFetching}
+        >
+          <option value="">
+            {isFetching ? "Loading Subjects..." : "Select Subject"}
+          </option>
+          {subcategories.length > 0 ? (
+            subcategories.map((sub) => (
+              <option key={sub._id} value={sub._id}>
+                {sub.name}
+              </option>
+            ))
+          ) : (
+            !isFetching && <option disabled>No subjects available</option>
+          )}
+        </select>
 
-            <select
-              name="subcategory"
-              className="w-full p-3 border rounded"
-              value={selectedSubCategoryId}
-              onChange={(e) => setSelectedSubCategoryId(e.target.value)}
-            >
-              <option value="" disabled>Select Sub Category</option>
-              {subCategories.map((item) => (
-                <option key={item._id} value={item._id}>{item.name}</option> // sending ID
-              ))}
-            </select>
-          </div>
+        <input
+          type="text"
+          placeholder="Main Headline"
+          value={mainHeadline}
+          onChange={(e) => setMainHeadline(e.target.value)}
+          className="border border-gray-300 p-2 rounded"
+        />
 
-          <div className='flex gap-4'>
-            <input
-              type="text"
-              name="headline"
-              placeholder="Main Headline"
-              className="w-full p-3 border rounded"
-              value={headline}
-              onChange={(e) => setHeadline(e.target.value)}
-            />
-            <input
-              type="text"
-              name="subHeadline"
-              placeholder="Sub Headline"
-              className="w-full p-3 border rounded"
-              value={subHeadline}
-              onChange={(e) => setSubHeadline(e.target.value)}
-            />
-          </div>
+        <input
+          type="text"
+          placeholder="Subheadline"
+          value={subheadline}
+          onChange={(e) => setSubheadline(e.target.value)}
+          className="border border-gray-300 p-2 rounded"
+        />
 
-          <div className='flex gap-4'>
-            <textarea
-              name="description"
-              placeholder="Description"
-              className="w-full h-28 p-3 border rounded resize-none"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+        <textarea
+          rows="4"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="border border-gray-300 p-2 rounded col-span-1 md:col-span-1"
+        ></textarea>
 
-            <label className="w-full h-28 border rounded flex items-center justify-center cursor-pointer bg-white text-gray-600 hover:text-blue-800">
-              <FiUpload className="text-2xl mr-2" />
-              <span>Upload Image</span>
-              <input
-                type="file"
-                name="image"
+        <label className="border border-gray-300 p-4 rounded flex flex-col items-center justify-center cursor-pointer h-full">
+          <FiUpload className="mb-2 text-gray-500" size={20} />
+          <span className="text-gray-500 text-sm">
+            {imageFile ? imageFile.name : "Upload Image"}
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files[0])}
+            className="hidden"
+          />
+        </label>
 
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setImage(e.target.files[0])}
-              />
-            </label>
-          </div>
-
-          <div className='text-center'>
-            <button type="submit" className="bg-[#12294A] text-white px-6 py-2 rounded hover:bg-[#0e1f3a]">
-              {loading ? "Adding" : "Add News"}
-            </button>
-          </div>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`col-span-1 md:col-span-2 bg-[#12294A] text-white px-4 py-2 rounded transition ${
+            isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#0e1f3a]"
+          }`}
+        >
+          {isLoading ? "Adding..." : buttonLabel}
+        </button>
+      </form>
     </div>
   );
 };
 
-export default News;
+export default AddNewsForm;

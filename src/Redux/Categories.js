@@ -15,8 +15,8 @@ const categoriesApi = createApi({
     }),
 
     getAllSubCategories: builder.query({
-      query: () => ({
-        url: "/admin/subcategories/getall",
+      query: (id) => ({
+        url: `/admin/subcategories/service/${id}`,
       }),
       providesTags: ["post"],
     }),

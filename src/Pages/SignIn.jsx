@@ -2,18 +2,22 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAddPostMutation, useVerifyMutation } from "../Redux/post";
 import a from "../assets/newsbg.png";
+import { toast } from "react-toastify";
 
 function SignUp() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [reporterId, setReporterId] = useState("");
-  const [addPost, { isLoading, error }] = useAddPostMutation();
-  const [verify] = useVerifyMutation();
+
+  
+  const [addPost, { isLoading: verifyEmailLoading, error: verifyError }] = useAddPostMutation();
+  const [verify, { isLoading: isLoginLoading, error: loginError }] = useVerifyMutation();
 
   const handleVerify = async () => {
     try {
       const response = await addPost({ email }).unwrap();
+      toast.success(response.message || "OTP sent");
       console.log("OTP sent:", response);
       if (response?.reporterId) {
         setReporterId(response.reporterId);
@@ -28,8 +32,8 @@ function SignUp() {
     e.preventDefault();
     try {
       const response = await verify({ email, otp, reporterId }).unwrap();
+      toast.success( response.message || "Successfully Logged In")
       console.log("Login Success:", response);
-      
       navigate("/dashboard");
     } catch (err) {
       console.error("Login Failed:", err);
@@ -73,34 +77,43 @@ function SignUp() {
             <button
               type="button"
               onClick={handleVerify}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full hover:bg-green-700 transition"
+              disabled={verifyEmailLoading}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full transition ${
+                verifyEmailLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
+              }`}
             >
-              Verify
+              {verifyEmailLoading ? "Verifying..." : "Verify"}
             </button>
           </div>
 
-          {/* OTP */}
-          <input
-            type="text"
-            placeholder="OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            required
-            className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
-          />
+          {/* OTP and Login button after verification */}
+          {reporterId && (
+            <>
+              <input
+                type="text"
+                placeholder="OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required
+                className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
+              />
 
-          {/* Submit/Login */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-medium hover:bg-[#0c1b3a] transition"
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
+              <button
+                type="submit"
+                disabled={isLoginLoading}
+                className={`w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${
+                  isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
+                }`}
+              >
+                {isLoginLoading ? "Logging in..." : "Login"}
+              </button>
+            </>
+          )}
 
-          {error && (
+          {/* Error messages (optional) */}
+          {(verifyError || loginError) && (
             <p className="text-red-600 text-sm">
-              Login failed. Please try again.
+              {verifyError ? "Failed to send OTP." : "Login failed. Please try again."}
             </p>
           )}
         </form>

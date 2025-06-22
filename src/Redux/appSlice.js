@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { postApi } from "./post";
-// import { apiSlice } from "./appSlice";
 
 const authSlice = createSlice({
   name: "auth",
@@ -8,7 +7,7 @@ const authSlice = createSlice({
     user: JSON.parse(localStorage.getItem("shopDetails")),
   },
   reducers: {
-    logout: (state) => {
+    logoutReporter: (state) => {
       state.user = null;
     }
   },
@@ -25,5 +24,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { logout } = authSlice.actions;
+export const { logoutReporter } = authSlice.actions;
 export default authSlice.reducer;
