@@ -114,7 +114,9 @@ const Blogs = () => {
               className={`px-3 py-2 rounded text-[10px] sm:text-base flex items-center gap-2 ${activeTab === tab ? 'bg-[#12294A] text-white' : 'bg-white'}`}
             >
               {tab}
-              <span className={`text-xs px-2 py-1 rounded-full ${activeTab === tab ? 'bg-white text-[#12294A]' : 'bg-[#12294A] text-white'}`}>
+              <span
+                className={`text-[6px] px-1 py-1 rounded-full sm:text-xs sm:px-2 ${activeTab === tab ? 'bg-white text-[#12294A]' : 'bg-[#12294A] text-white'}`}
+              >
                 {count}
               </span>
             </button>
