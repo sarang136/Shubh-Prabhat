@@ -90,13 +90,15 @@ function SignUp() {
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
 
-          <button
+          <div className='flex justify-center'>
+            <button
             type="submit"
             disabled={isLoading}
-            className="w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-normal hover:bg-[#0c1b3a] transition"
+            className=" py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-normal hover:bg-[#0c1b3a] transition"
           >
             {isLoading ? 'Signing Up...' : 'Sign Up'}
           </button>
+          </div>
 
           {error && <p className="text-red-600 text-sm">Registration failed. Please try again.</p>}
 
