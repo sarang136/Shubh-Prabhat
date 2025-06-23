@@ -255,9 +255,11 @@ const TotalNews = () => {
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#12294A] text-white px-6 py-2 rounded"
+                  disabled={loading}
+                  className={`bg-[#12294A] text-white px-6 py-2 rounded transition ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    }`}
                 >
-                  {loading ? "Updating" : "Update"}
+                  {loading ? 'Updating...' : 'Update'}
                 </button>
               </div>
             </form>
