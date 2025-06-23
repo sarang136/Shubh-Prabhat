@@ -35,24 +35,26 @@ function SignUp() {
   };
 
   return (
-    <div className="flex flex-col font-marathi md:flex-row min-h-screen">
-      {/* Left panel */}
-      <div className="relative flex-1 w-[100vw] h-64 md:h-[100vh]  bg-[#] ">
-        <div className="absolute inset-0 ">
-          <img src={a} alt="News background" className="w-[100%] md:w-[50vw]  bg-[#12294A] h-full object-cover"/>
-        </div>
+    <div className="flex flex-col md:flex-row min-h-screen font-marathi">
+      {/* Left Panel */}
+      <div className="flex-1 h-64 md:h-auto relative">
+        <img
+          src={a}
+          alt="News background"
+          className="absolute inset-0 w-full h-full object-cover bg-[#12294A]"
+        />
       </div>
 
-      {/* Right panel */}
-      <div className="w-full md:max-w-md flex flex-col justify-center items-center bg-white px-6 py-6">
-        <h1 className="text-5xl font-normal text-red-600 mb-4 md:mb-4 text-center w-full md:-ml-28">
+      {/* Right Panel */}
+      <div className="flex-1 flex flex-col justify-center items-center bg-white px-6 py-6">
+        <h1 className="text-5xl font-normal text-red-600 mb-4 text-center w-full">
           शुभ प्रभात
         </h1>
-        <h2 className="text-2xl font-normal text-[#0F2248] mb-6 md:mb-6 text-center w-full md:-ml-28">
+        <h2 className="text-2xl font-normal text-[#0F2248] mb-6 text-center w-full">
           SIGN UP
         </h2>
 
-        <form onSubmit={handleSubmit} className="w-full space-y-6 md:-ml-28">
+        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
           <input
             type="text"
             name="ReporterName"
@@ -92,32 +94,25 @@ function SignUp() {
 
           <div className='flex justify-center'>
             <button
-            type="submit"
-            disabled={isLoading}
-            className=" py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-normal hover:bg-[#0c1b3a] transition"
-          >
-            {isLoading ? 'Signing Up...' : 'Sign Up'}
-          </button>
+              type="submit"
+              disabled={isLoading}
+              className="py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-normal hover:bg-[#0c1b3a] transition"
+            >
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
+            </button>
           </div>
 
           {error && <p className="text-red-600 text-sm">Registration failed. Please try again.</p>}
 
-          {/* <h1 className="text-xl font-normal ml-16">
-            Already Have Account?{' '}
+          <p className="cursor-pointer text-center">
+            Already Have Account?
             <span
-              className="text-red-600 cursor-pointer hover:underline"
+              className="text-red-600 cursor-pointer hover:underline ml-1"
               onClick={handleNavigateToSignIn}
             >
               Sign In
             </span>
-          </h1> */}
-
-           <p className="cursor-pointer text-center">Already Have Account?<span
-              className="text-red-600 cursor-pointer hover:underline"
-              onClick={handleNavigateToSignIn}
-            >
-              Sign In
-            </span></p>
+          </p>
         </form>
       </div>
     </div>

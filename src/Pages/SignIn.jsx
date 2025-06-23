@@ -11,8 +11,6 @@ function SignUp() {
   const [reporterId, setReporterId] = useState("");
   const location = useLocation();
   const message = location.state || {};
-  // console.log(message);
-
 
   const [addPost, { isLoading: verifyEmailLoading, error: verifyError }] = useAddPostMutation();
   const [verify, { isLoading: isLoginLoading, error: loginError }] = useVerifyMutation();
@@ -21,7 +19,6 @@ function SignUp() {
     try {
       const response = await addPost({ email }).unwrap();
       toast.success(response.message || "OTP sent");
-      console.log("OTP sent:", response);
       if (response?.reporterId) {
         setReporterId(response.reporterId);
       }
@@ -35,8 +32,7 @@ function SignUp() {
     e.preventDefault();
     try {
       const response = await verify({ email, otp, reporterId }).unwrap();
-      toast.success(response.message || "Successfully Logged In")
-      console.log("Login Success:", response);
+      toast.success(response.message || "Successfully Logged In");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login Failed:", err);
@@ -45,32 +41,32 @@ function SignUp() {
   };
 
   return (
-    <div className="flex flex-col font-marathi md:flex-row min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen font-marathi">
       {/* Left Panel */}
-      <div className="relative flex-1 w-full h-64 md:h-auto">
-        <div className="absolute inset-0">
-          <img
-            src={a}
-            alt="News background"
-            className="w-full h-full object-cover bg-[#12294A]"
-          />
-        </div>
+      <div className="flex-1 h-64 md:h-auto relative">
+        <img
+          src={a}
+          alt="News background"
+          className="absolute inset-0 w-full h-full object-cover bg-[#12294A]"
+        />
       </div>
 
       {/* Right Panel */}
-      <div className="w-full md:max-w-md flex flex-col justify-center items-center bg-white px-6 py-12">
-
-        <h1 className="text-5xl font-normal text-red-600 mb-4 md:mb-6 text-center w-full md:-ml-28">
+      <div className="flex-1 flex flex-col justify-center items-center bg-white px-6 py-12">
+        <h1 className="text-5xl font-normal text-red-600 mb-4 text-center w-full">
           शुभ प्रभात
         </h1>
-        <h2 className="text-2xl font-normal text-[#0F2248] mb-6 md:mb-12 text-center w-full md:-ml-28">
+        <h2 className="text-2xl font-normal text-[#0F2248] mb-6 text-center w-full">
           LOGIN
         </h2>
-        <p className="md:-ml-28 text-sm text-gray-500 p-4">{message.message}</p>
+        {message?.message && (
+          <p className="text-sm text-gray-500 p-2 text-center w-full">
+            {message.message}
+          </p>
+        )}
 
-        <form onSubmit={handleLogin} className="w-full space-y-6 md:-ml-28">
-          {/* Email + Verify */}
-
+        <form onSubmit={handleLogin} className="w-full max-w-md space-y-6">
+          {/* Email input + Verify OTP */}
           <div className="relative w-full">
             <input
               type="email"
@@ -91,7 +87,7 @@ function SignUp() {
             </button>
           </div>
 
-          {/* OTP and Login button after verification */}
+          {/* OTP and Login button */}
           {reporterId && (
             <>
               <input
@@ -103,26 +99,35 @@ function SignUp() {
                 className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
               />
 
-              <button
-                type="submit"
-                disabled={isLoginLoading}
-                className={`w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
-                  }`}
-              >
-                {isLoginLoading ? "Logging in..." : "Login"}
-              </button>
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  disabled={isLoginLoading}
+                  className={`py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
+                    }`}
+                >
+                  {isLoginLoading ? "Logging in..." : "Login"}
+                </button>
+              </div>
             </>
           )}
 
-          {/* Error messages (optional) */}
+          {/* Error message */}
           {(verifyError || loginError) && (
-            <p className="text-red-600 text-sm">
+            <p className="text-red-600 text-sm text-center">
               {verifyError ? "Failed to send OTP." : "Login failed. Please try again."}
             </p>
           )}
-          <p className="cursor-pointer text-center">Don't have any account?<span className="text-red-600 "
-            onClick={() => navigate("/signup")}
-          >Create Account</span></p>
+
+          <p className="cursor-pointer text-center">
+            Don’t have an account?{" "}
+            <span
+              className="text-red-600 hover:underline"
+              onClick={() => navigate("/signup")}
+            >
+              Create Account
+            </span>
+          </p>
         </form>
       </div>
     </div>
