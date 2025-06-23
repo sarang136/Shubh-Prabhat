@@ -52,7 +52,7 @@ function SignUp() {
           <img
             src={a}
             alt="News background"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover bg-[#12294A]"
           />
         </div>
       </div>
