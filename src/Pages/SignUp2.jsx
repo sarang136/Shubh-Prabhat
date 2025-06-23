@@ -37,9 +37,9 @@ function SignUp() {
   return (
     <div className="flex flex-col font-marathi md:flex-row min-h-screen">
       {/* Left panel */}
-      <div className="relative flex-1 w-[100vw] h-64 md:h-auto bg-[#12294A]">
-        <div className="absolute inset-0">
-          <img src={a} alt="News background" className="w-[100%] h-full object-cover"/>
+      <div className="relative flex-1 w-[100vw] h-64 md:h-[100vh]  bg-[#] ">
+        <div className="absolute inset-0 ">
+          <img src={a} alt="News background" className="w-[100%] md:w-[50vw]  bg-[#12294A] h-full object-cover"/>
         </div>
       </div>
 
