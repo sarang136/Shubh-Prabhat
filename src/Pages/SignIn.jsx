@@ -120,7 +120,7 @@ function SignUp() {
               {verifyError ? "Failed to send OTP." : "Login failed. Please try again."}
             </p>
           )}
-          <p className="cursor-pointer text-center">Don't have any account <span className="text-blue-800 underline"
+          <p className="cursor-pointer text-center">Don't have any account?<span className="text-red-600 "
             onClick={() => navigate("/signup")}
           >Create Account</span></p>
         </form>
