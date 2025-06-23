@@ -8,9 +8,11 @@ import { useGetAllNewsQuery, useUpdateNewsMutation } from '../Redux/newsAPI.js';
 import { useDeleteNewsMutation } from '../Redux/newsAPI.js';
 
 const TotalNews = () => {
-  const { data: newsList, isLoading, isError } = useGetAllNewsQuery("6853b28ec12e9e89dc1cf37a");
+  const reporter = useSelector((state) => state.auth)
+  console.log(reporter)
+  const { data: newsList, isLoading, isError } = useGetAllNewsQuery(reporter?.user?.reporter?._id);
   const [deleteNews] = useDeleteNewsMutation();
-  const [updateNews, {isLoading: loading}] = useUpdateNewsMutation();
+  const [updateNews, { isLoading: loading }] = useUpdateNewsMutation();
   const { user } = useSelector((state) => state.auth);
   const reporterId = user?.reporter?._id;
 
@@ -25,12 +27,14 @@ const TotalNews = () => {
   const newsArray = Array.isArray(newsList)
     ? newsList
     : Array.isArray(newsList?.data)
-    ? newsList.data
-    : [];
+      ? newsList.data
+      : [];
 
   const filteredNews = statusFilter
     ? newsArray.filter(item => item.product?.status === statusFilter)
     : newsArray;
+
+  console.log(filteredNews)
 
   const handleReadMore = (item) => {
     setSelectedNews(item);
@@ -61,7 +65,7 @@ const TotalNews = () => {
       MainHeadline: product.MainHeadline || '',
       Subheadline: product.Subheadline || '',
       Description: product.Description || '',
-      status: product.status || '',
+      image: product.image || '',
     });
   };
 
@@ -75,11 +79,17 @@ const TotalNews = () => {
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedData = {
-        ...editModalData,
-        reporterId,
-      };
-      await updateNews({ id: editModalData._id, updatedData }).unwrap();
+      const formData = new FormData();
+      formData.append('MainHeadline', editModalData.MainHeadline);
+      formData.append('Subheadline', editModalData.Subheadline);
+      formData.append('Description', editModalData.Description);
+      formData.append('reporterId', reporterId);
+
+      if (editModalData.image instanceof File) {
+        formData.append('image', editModalData.image);
+      }
+
+      await updateNews({ id: editModalData._id, updatedData: formData }).unwrap();
       toast.success("News updated successfully!");
       setEditModalData(null);
     } catch (err) {
@@ -95,7 +105,7 @@ const TotalNews = () => {
 
       {filteredNews.length === 0 ? (
         <div className="text-center text-gray-600 font-medium text-lg mt-10">
-          {statusFilter ? `No Data fetched.` : 'No news data found.'}
+          {statusFilter ? `No Data fetched.` : 'No Data found.'}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
@@ -116,7 +126,19 @@ const TotalNews = () => {
                 />
 
                 <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                  <h1>Uploaded On: {item.uploadedOn || 'Unknown Date'}</h1>
+                  <h1>
+                    Uploaded On:{" "}
+                    {item?.product?.date
+                      ? new Date(item.product.date).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                      : "Unknown Date"}
+                  </h1>
                   <h1>
                     <span className={`${item.statusColor || 'text-green-600'} font-medium`}>
                       {item.product.status || 'Published'}
@@ -124,7 +146,7 @@ const TotalNews = () => {
                   </h1>
                 </div>
 
-                <h1 className="mb-2 font-normal text-xl">
+                <h1 className="mb-2 font-normal text-xl max-h-[60px] overflow-hidden text-ellipsis line-clamp-2">
                   {item.product.MainHeadline || 'Untitled News'}
                 </h1>
               </div>
@@ -216,12 +238,12 @@ const TotalNews = () => {
                 placeholder="Description"
               />
               <input
-                type="text"
-                name="status"
-                value={editModalData.status}
-                onChange={handleEditChange}
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setEditModalData({ ...editModalData, image: e.target.files[0] })
+                }
                 className="w-full border p-2 rounded"
-                placeholder="Status (e.g., Published)"
               />
               <div className="flex justify-end gap-4">
                 <button

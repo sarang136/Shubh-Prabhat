@@ -11,6 +11,7 @@ const Dashboard = () => {
 const reporter = useSelector((state) => state.auth)
 console.log(reporter)
   const { data: newsList, isLoading, isError } = useGetAllNewsQuery(reporter?.user?.reporter?._id);
+  console.log(newsList)
   const navigate = useNavigate();
 
   const news = newsList?.data || [];

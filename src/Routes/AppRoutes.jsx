@@ -21,8 +21,8 @@ const AppRoutes = () => {
       {isAuthPage ? (
         <>
           {/* Make / go to SignUp page */}
-          <Route path="/" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
+          {/* <Route path="/" element={<SignUp />} /> */}
+          <Route path="/" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
         </>
       ) : (

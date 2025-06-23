@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAddPostMutation, useVerifyMutation } from "../Redux/post";
 import a from "../assets/newsbg.png";
 import { toast } from "react-toastify";
@@ -9,8 +9,11 @@ function SignUp() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [reporterId, setReporterId] = useState("");
+  const location = useLocation();
+  const message = location.state || {};
+  // console.log(message);
 
-  
+
   const [addPost, { isLoading: verifyEmailLoading, error: verifyError }] = useAddPostMutation();
   const [verify, { isLoading: isLoginLoading, error: loginError }] = useVerifyMutation();
 
@@ -32,7 +35,7 @@ function SignUp() {
     e.preventDefault();
     try {
       const response = await verify({ email, otp, reporterId }).unwrap();
-      toast.success( response.message || "Successfully Logged In")
+      toast.success(response.message || "Successfully Logged In")
       console.log("Login Success:", response);
       navigate("/dashboard");
     } catch (err) {
@@ -56,15 +59,18 @@ function SignUp() {
 
       {/* Right Panel */}
       <div className="w-full md:max-w-md flex flex-col justify-center items-center bg-white px-6 py-12">
+
         <h1 className="text-5xl font-normal text-red-600 mb-4 md:mb-6 text-center w-full md:-ml-28">
           शुभ प्रभात
         </h1>
         <h2 className="text-2xl font-normal text-[#0F2248] mb-6 md:mb-12 text-center w-full md:-ml-28">
           LOGIN
         </h2>
+        <p className="md:-ml-28 text-sm text-gray-500 p-4">{message.message}</p>
 
         <form onSubmit={handleLogin} className="w-full space-y-6 md:-ml-28">
           {/* Email + Verify */}
+
           <div className="relative w-full">
             <input
               type="email"
@@ -78,9 +84,8 @@ function SignUp() {
               type="button"
               onClick={handleVerify}
               disabled={verifyEmailLoading}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full transition ${
-                verifyEmailLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
-              }`}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full transition ${verifyEmailLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
+                }`}
             >
               {verifyEmailLoading ? "Verifying..." : "Verify"}
             </button>
@@ -101,9 +106,8 @@ function SignUp() {
               <button
                 type="submit"
                 disabled={isLoginLoading}
-                className={`w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${
-                  isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
-                }`}
+                className={`w-28 mx-36 h-12 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
+                  }`}
               >
                 {isLoginLoading ? "Logging in..." : "Login"}
               </button>
@@ -116,6 +120,9 @@ function SignUp() {
               {verifyError ? "Failed to send OTP." : "Login failed. Please try again."}
             </p>
           )}
+          <p className="cursor-pointer text-center">Don't have any account <span className="text-blue-800 underline"
+            onClick={() => navigate("/signup")}
+          >Create Account</span></p>
         </form>
       </div>
     </div>

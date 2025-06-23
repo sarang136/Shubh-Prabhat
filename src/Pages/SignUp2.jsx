@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { useRegisterMutation } from '../'; // ✅ Adjust path as per your structure
 import a from '../assets/newsbg.png';
 import { useRegisterMutation } from '../Redux/post';
 
@@ -25,14 +24,14 @@ function SignUp() {
     try {
       const response = await register(formData).unwrap();
       console.log("Registration Success:", response);
-      navigate('/signin'); // ✅ Redirect after success
+      navigate('/', { state: { message: response.message } });
     } catch (err) {
       console.error("Registration Failed:", err);
     }
   };
 
   const handleNavigateToSignIn = () => {
-    navigate('/signin');
+    navigate('/');
   };
 
   return (
@@ -101,7 +100,7 @@ function SignUp() {
 
           {error && <p className="text-red-600 text-sm">Registration failed. Please try again.</p>}
 
-          <h1 className="text-xl font-normal ml-16">
+          {/* <h1 className="text-xl font-normal ml-16">
             Already Have Account?{' '}
             <span
               className="text-red-600 cursor-pointer hover:underline"
@@ -109,7 +108,14 @@ function SignUp() {
             >
               Sign In
             </span>
-          </h1>
+          </h1> */}
+
+           <p className="cursor-pointer text-center">Already Have Account?<span
+              className="text-red-600 cursor-pointer hover:underline"
+              onClick={handleNavigateToSignIn}
+            >
+              Sign In
+            </span></p>
         </form>
       </div>
     </div>

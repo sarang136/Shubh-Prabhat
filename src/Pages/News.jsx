@@ -6,6 +6,8 @@ import {
   useGetAllSubCategoriesQuery,
 } from "../Redux/Categories";
 import { useAddNewsMutation } from "../Redux/newsAPI";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
   const { data: categoryData = [] } = useGetAllCategoriesQuery();
@@ -26,6 +28,8 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
   const subcategories = subCategoryData?.product?.subcategories || [];
 
   const [addNews, { isLoading }] = useAddNewsMutation();
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,8 +57,8 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
 
     try {
       await addNews(formData).unwrap();
-      alert("News added successfully!");
-      // Resetting form (optional)
+      toast.success("News added successfully!");
+      navigate("/totalnews");
       setSelectedCategoryId("");
       setSelectedSubCategoryId("");
       setMainHeadline("");
@@ -68,10 +72,10 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
   };
 
   return (
-    <div className="h-[85vh] flex items-center justify-center bg-gray-100 font-tiro">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 font-tiro py-10 px-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-10 rounded shadow-md max-w-4xl w-6/12 grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="bg-white p-6 sm:p-8 md:p-10 rounded shadow-md w-full sm:w-10/12 lg:w-6/12 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6"
         encType="multipart/form-data"
       >
         <select
@@ -115,7 +119,7 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
           placeholder="Main Headline"
           value={mainHeadline}
           onChange={(e) => setMainHeadline(e.target.value)}
-          className="border border-gray-300 p-2 rounded"
+          className="border border-gray-300 p-2 rounded col-span-1"
         />
 
         <input
@@ -123,7 +127,7 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
           placeholder="Subheadline"
           value={subheadline}
           onChange={(e) => setSubheadline(e.target.value)}
-          className="border border-gray-300 p-2 rounded"
+          className="border border-gray-300 p-2 rounded col-span-1"
         />
 
         <textarea
@@ -131,10 +135,10 @@ const AddNewsForm = ({ buttonLabel = "+ Add News", defaultValues = {} }) => {
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="border border-gray-300 p-2 rounded col-span-1 md:col-span-1"
+          className="border border-gray-300 p-2 rounded col-span-1 md:col-span-2 resize-none"
         ></textarea>
 
-        <label className="border border-gray-300 p-4 rounded flex flex-col items-center justify-center cursor-pointer h-full">
+        <label className="border border-gray-300 p-4 rounded flex flex-col items-center justify-center cursor-pointer h-full overflow-hidden col-span-1 md:col-span-2">
           <FiUpload className="mb-2 text-gray-500" size={20} />
           <span className="text-gray-500 text-sm">
             {imageFile ? imageFile.name : "Upload Image"}

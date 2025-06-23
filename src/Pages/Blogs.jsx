@@ -36,7 +36,7 @@ const Blogs = () => {
   const [addBlogs, { isLoading: loading }] = useAddBlogsMutation();
   const [deleteBlog] = useDeleteBlogMutation();
   const [updateBlog, { isLoading }] = useUpdateBlogMutation();
-  const { data: pendingBlogs } = useGetPendingBlogsQuery(reporterId, {
+  const { data: pendingBlogs, refetch } = useGetPendingBlogsQuery(reporterId, {
     skip: !reporterId,
   });
 
@@ -59,77 +59,51 @@ const Blogs = () => {
 
     try {
       await addBlogs(formData).unwrap();
-      setIsModalOpen(false);
+      toast.success("Blog added successfully!");
       setHeadline('');
       setSubHeadline('');
       setDescription('');
       setImage(null);
-      toast.success("Blog added successfully!");
+      setIsModalOpen(false);
+      refetch();
     } catch (err) {
+      console.error(err);
       toast.error("Something went wrong.");
     }
   };
 
- const handleDelete = async (id) => {
-  if (window.confirm('Are you sure you want to delete this blog?')) {
-    try {
-      await deleteBlog(id).unwrap();     
-      toast.success('Blog deleted successfully.');
-      // refetch();                         
-    } catch (err) {
-      toast.error('Failed to delete blog.');
-      console.error('Delete error:', err); 
-    }
-  }
-};
-
-
-
-  const handleUpdateSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedBlog.MainHeadline || !selectedBlog.Description) {
-      toast.error("Please fill required fields.");
-      return;
-    }
-
-    const updatedData = {
-      MainHeadline: selectedBlog.MainHeadline,
-      Subheadline: selectedBlog.Subheadline,
-      Description: selectedBlog.Description,
-    };
-
-    if (selectedBlog.newImage) {
-      const base64Image = await toBase64(selectedBlog.newImage);
-      updatedData.image = base64Image;
-    }
-
-    try {
-      await updateBlog({ id: selectedBlog._id, updatedData }).unwrap();
-      toast.success("Blog updated successfully!");
-      setIsUpdateModalOpen(false);
-      setSelectedBlog(null);
-    } catch (err) {
-      toast.error("Update failed.");
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this blog?')) {
+      try {
+        await deleteBlog(id).unwrap();
+        toast.success('Blog deleted successfully.');
+        refetch();
+      } catch (err) {
+        toast.error('Failed to delete blog.');
+      }
     }
   };
 
   const tabStatuses = ['Approved', 'Pending', 'Rejected'];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-4">
-        <p className="font-bold text-2xl flex items-center">
-          Total Blogs <span className="ml-2 text-2xl text-gray-500">({totalBlogCount})</span>
+    <div className="p-4 sm:p-6">
+      {/* Top Header and Button */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+        <p className="font-bold text-xl sm:text-2xl flex items-center">
+          Total Blogs <span className="ml-2 text-gray-500">({totalBlogCount})</span>
         </p>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-6 py-2 border rounded-lg bg-[#12294A] text-white"
+          className="mt-2 sm:mt-0 px-4 sm:px-6 py-2 border rounded-lg bg-[#12294A] text-white text-sm sm:text-base"
         >
           Add Blog
         </button>
       </div>
 
-      <div className="bg-gray-100 p-4 rounded mb-6 flex gap-4">
+      {/* Tabs */}
+      <div className="bg-gray-100 p-3 sm:p-4 rounded mb-6 flex justify-center sm:justify-start flex-wrap gap-4">
+
         {tabStatuses.map((tab) => {
           const count =
             pendingBlogs?.data?.filter(blog => blog.status?.toLowerCase() === tab.toLowerCase())?.length || 0;
@@ -137,7 +111,7 @@ const Blogs = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded flex items-center gap-2 ${activeTab === tab ? 'bg-[#12294A] text-white' : 'bg-white'}`}
+              className={`px-3 py-2 rounded text-[10px] sm:text-base flex items-center gap-2 ${activeTab === tab ? 'bg-[#12294A] text-white' : 'bg-white'}`}
             >
               {tab}
               <span className={`text-xs px-2 py-1 rounded-full ${activeTab === tab ? 'bg-white text-[#12294A]' : 'bg-[#12294A] text-white'}`}>
@@ -148,9 +122,10 @@ const Blogs = () => {
         })}
       </div>
 
+      {/* Blog Cards */}
       <div>
         {pendingBlogs?.data?.filter(blog => blog.status.toLowerCase() === activeTab.toLowerCase())?.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pendingBlogs.data
               .filter(blog => blog.status.toLowerCase() === activeTab.toLowerCase())
               .map((data, index) => (
@@ -160,7 +135,7 @@ const Blogs = () => {
                     alt="Blog"
                     className="w-full h-40 object-cover rounded"
                   />
-                  <p className="text-[12px] italic mt-2">
+                  <p className="text-xs italic mt-2 text-gray-500">
                     Updated on: {new Date(data.updatedAt).toLocaleString("en-IN", {
                       day: "2-digit",
                       month: "short",
@@ -170,26 +145,15 @@ const Blogs = () => {
                       hour12: true,
                     })}
                   </p>
-                  <p className="font-semibold mt-2">{data.MainHeadline}</p>
+                  <p className="font-semibold mt-2 line-clamp-2">{data.MainHeadline}</p>
                   <p className="text-sm text-gray-600">{data.Subheadline}</p>
                   <div className="flex justify-between items-end">
                     <p className="text-sm text-red-500 underline mt-4 cursor-pointer" onClick={() => setReadModalData(data)}>
                       Read More
                     </p>
                     <div className="flex gap-2">
-                      <FaEdit
-                        size={20}
-                        onClick={() => {
-                          setSelectedBlog({ ...data, newImage: null });
-                          setIsUpdateModalOpen(true);
-                        }}
-                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                      />
-                      <MdDelete
-                        size={20}
-                        onClick={() => handleDelete(data._id)}
-                        className="text-red-400 hover:text-black cursor-pointer"
-                      />
+                      <FaEdit size={20} className="text-blue-500 hover:text-blue-700 cursor-pointer" />
+                      <MdDelete size={20} className="text-red-400 hover:text-black cursor-pointer" onClick={() => handleDelete(data._id)} />
                     </div>
                   </div>
                 </div>
@@ -202,20 +166,50 @@ const Blogs = () => {
 
       {/* Add Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold">Add Blog</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md sm:max-w-md md:max-w-lg">
+            <h2 className="text-xl font-bold mb-4">Add Blog</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="text" placeholder="Main Headline" value={headline} onChange={(e) => setHeadline(e.target.value)} className="w-full p-2 border rounded" />
-              <input type="text" placeholder="Subheadline" value={subHeadline} onChange={(e) => setSubHeadline(e.target.value)} className="w-full p-2 border rounded" />
-              <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded h-24 resize-none" />
-              <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} className="w-full" />
+              <input
+                type="text"
+                placeholder="Main Headline"
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="Subheadline"
+                value={subHeadline}
+                onChange={(e) => setSubHeadline(e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+              <textarea
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2 border rounded h-24 resize-none"
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="w-full"
+              />
               <div className="flex justify-between">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">
-
-                  {loading ? "Adding" : "Add Blog"}
-
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a] transition ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {loading ? "Adding..." : "Add Blog"}
                 </button>
               </div>
             </form>
@@ -223,55 +217,6 @@ const Blogs = () => {
         </div>
       )}
 
-      {/* Update Modal */}
-      {isUpdateModalOpen && selectedBlog && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold">Update Blog</h2>
-            <form onSubmit={handleUpdateSubmit} className="space-y-">
-              <label className='text-gray-400'>Main Headline</label>
-              <input type="text" value={selectedBlog.MainHeadline} onChange={(e) => setSelectedBlog({ ...selectedBlog, MainHeadline: e.target.value })} className="w-full p-2 border rounded" />
-               <label className='text-gray-400'>Sub Headline</label>
-              <input type="text" value={selectedBlog.Subheadline} onChange={(e) => setSelectedBlog({ ...selectedBlog, Subheadline: e.target.value })} className="w-full p-2 border rounded" />
-              <label className='text-gray-400'>Description</label>
-              <textarea value={selectedBlog.Description} onChange={(e) => setSelectedBlog({ ...selectedBlog, Description: e.target.value })} className="w-full p-2 border rounded h-24 resize-none" />
-                <label className='text-gray-400'>Image</label>
-              <input type="file" accept="image/*" onChange={(e) => setSelectedBlog({ ...selectedBlog, newImage: e.target.files[0] })} className="w-full" />
-              <div className="flex justify-between">
-                <button type="button" onClick={() => setIsUpdateModalOpen(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-[#12294A] text-white rounded hover:bg-[#0e1f3a]">
-                  {isLoading ? "Updating" : "Update"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Read More Modal */}
-      {readModalData && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-3xl w-full space-y-4 overflow-y-scroll max-h-[70vh]">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold">{readModalData.MainHeadline}</h2>
-              <button onClick={() => setReadModalData(null)} className="text-xl text-gray-500 hover:text-black">&times;</button>
-            </div>
-            <p className="text-gray-700">{readModalData.Subheadline}</p>
-            <img src={readModalData.image?.startsWith('http') ? readModalData.image : `http://localhost:5000/${readModalData.image}`} alt="Blog Full" className="w-full object-contain max-h-[400px] rounded" />
-            <p className="text-[14px] italic text-gray-500">
-              Uploaded on: {new Date(readModalData.updatedAt).toLocaleString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })}
-            </p>
-            <p className="text-base text-gray-800">{readModalData.Description}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
