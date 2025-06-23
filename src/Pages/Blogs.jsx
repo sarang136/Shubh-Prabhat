@@ -31,9 +31,10 @@ const Blogs = () => {
 
   const auth = useSelector((state) => state.auth);
   const reporterId = auth?.user?.reporter?._id;
+  console.log(reporterId);
   const shopId = auth?.user?.shop?._id;
 
-  const [addBlogs, { isLoading: loading }] = useAddBlogsMutation();
+  const [addBlogs, { isLoading: loading }] = useAddBlogsMutation(reporterId);
   const [deleteBlog] = useDeleteBlogMutation();
   const [updateBlog, { isLoading }] = useUpdateBlogMutation();
   const { data: pendingBlogs, refetch } = useGetPendingBlogsQuery(reporterId, {
