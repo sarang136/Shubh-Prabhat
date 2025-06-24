@@ -15,6 +15,8 @@ function SignUp() {
   const [addPost, { isLoading: verifyEmailLoading, error: verifyError }] = useAddPostMutation();
   const [verify, { isLoading: isLoginLoading, error: loginError }] = useVerifyMutation();
 
+  const isEmailValid = email.includes("@") && email.includes(".com");
+
   const handleVerify = async () => {
     try {
       const response = await addPost({ email }).unwrap();
@@ -38,6 +40,11 @@ function SignUp() {
       console.error("Login Failed:", err);
       alert("Something went wrong. Please check your OTP and try again.");
     }
+  };
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Only digits
+    if (value.length <= 4) setOtp(value);
   };
 
   return (
@@ -79,9 +86,12 @@ function SignUp() {
             <button
               type="button"
               onClick={handleVerify}
-              disabled={verifyEmailLoading}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full transition ${verifyEmailLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
-                }`}
+              disabled={!isEmailValid || verifyEmailLoading}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1 bg-green-600 text-white text-sm rounded-full transition ${
+                !isEmailValid || verifyEmailLoading
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-green-700"
+              }`}
             >
               {verifyEmailLoading ? "Verifying..." : "Verify"}
             </button>
@@ -92,9 +102,11 @@ function SignUp() {
             <>
               <input
                 type="text"
+                inputMode="numeric"
+                maxLength={4}
                 placeholder="OTP"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)}
+                onChange={handleOtpChange}
                 required
                 className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
               />
@@ -102,9 +114,12 @@ function SignUp() {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  disabled={isLoginLoading}
-                  className={`py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${isLoginLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#0c1b3a]"
-                    }`}
+                  disabled={isLoginLoading || otp.length !== 4}
+                  className={`py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-medium transition ${
+                    isLoginLoading || otp.length !== 4
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-[#0c1b3a]"
+                  }`}
                 >
                   {isLoginLoading ? "Logging in..." : "Login"}
                 </button>

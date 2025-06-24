@@ -53,7 +53,7 @@ const Blogs = () => {
   const refetchCurrent = () => {
     switch (activeTab) {
       case 'Approved': refetchApproved(); break;
-      case 'Pending': refetchPending();
+      case 'Pending': refetchPending(); break;
       case 'Rejected': refetchRejected(); break;
     }
   };

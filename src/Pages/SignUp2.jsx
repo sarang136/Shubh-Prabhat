@@ -16,7 +16,16 @@ function SignUp() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "contactNo") {
+      // Allow only digits and max 10 digits
+      const digitsOnly = value.replace(/\D/g, "");
+      if (digitsOnly.length <= 10) {
+        setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -26,13 +35,21 @@ function SignUp() {
       console.log("Registration Success:", response);
       navigate('/', { state: { message: response.message } });
     } catch (err) {
-      console.error("Registration Failed:", err);
+      // <p>{}</p>
+      console.error("Registration Failed:", err.data.error);
     }
   };
 
   const handleNavigateToSignIn = () => {
     navigate('/');
   };
+
+
+  const isFormValid =
+    formData.ReporterName.trim() !== '' &&
+    formData.email.trim() !== '' &&
+    formData.contactNo.length === 10 &&
+    formData.address.trim() !== '';
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen font-marathi">
@@ -64,6 +81,7 @@ function SignUp() {
             required
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
+
           <input
             type="email"
             name="email"
@@ -73,6 +91,7 @@ function SignUp() {
             required
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
+
           <input
             type="text"
             name="contactNo"
@@ -80,8 +99,11 @@ function SignUp() {
             value={formData.contactNo}
             onChange={handleChange}
             required
+            inputMode="numeric"
+            pattern="\d{10}"
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
+
           <input
             type="text"
             name="address"
@@ -95,14 +117,22 @@ function SignUp() {
           <div className='flex justify-center'>
             <button
               type="submit"
-              disabled={isLoading}
-              className="py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-normal hover:bg-[#0c1b3a] transition"
+              disabled={isLoading || !isFormValid}
+              className={`py-2 px-4 bg-[#0F2248] text-white rounded-full text-lg font-normal transition ${
+                isLoading || !isFormValid
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#0c1b3a]"
+              }`}
             >
               {isLoading ? 'Signing Up...' : 'Sign Up'}
             </button>
           </div>
 
-          {error && <p className="text-red-600 text-sm">Registration failed. Please try again.</p>}
+          {error && (
+            <p className="text-red-600 text-sm text-center">
+              {error?.data?.error}
+            </p>
+          )}
 
           <p className="cursor-pointer text-center">
             Already Have Account?
