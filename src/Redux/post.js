@@ -24,9 +24,9 @@ export const postApi = createApi({
       query: (register) => ({
         url: '/reporter/auth/register',
         method: 'POST',
-        body: register,
+        body: register, 
       }),
-      invalidatesTags: ["post"],
+      invalidatesTags: ['post'],
     }),
 
     verify: builder.mutation({
@@ -45,7 +45,7 @@ export const postApi = createApi({
         body,
       }),
     }),
-   
+
   }),
 });
 

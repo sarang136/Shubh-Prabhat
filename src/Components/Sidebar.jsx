@@ -42,8 +42,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           ))}
         </ul>
       </div>
-
-      {/* Mobile backdrop */}
+      
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 z-30 lg:hidden"

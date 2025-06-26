@@ -10,19 +10,26 @@ function SignUp() {
     email: '',
     contactNo: '',
     address: '',
+    AadharCardImage: null,
+    ReporterProfile: null,
   });
 
   const [register, { isLoading, error }] = useRegisterMutation();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
     if (name === "contactNo") {
-      // Allow only digits and max 10 digits
       const digitsOnly = value.replace(/\D/g, "");
       if (digitsOnly.length <= 10) {
         setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
       }
+    } else if (name === "AadharCardImage" || name === "ReporterProfile") {
+      if (files[0].size > 5 * 1024 * 1024) {
+        alert("File too large. Max 5MB allowed.");
+        return;
+      }
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -30,13 +37,21 @@ function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const formToSend = new FormData();
+    formToSend.append("ReporterName", formData.ReporterName);
+    formToSend.append("email", formData.email);
+    formToSend.append("contactNo", formData.contactNo);
+    formToSend.append("address", formData.address);
+    formToSend.append("AadharCardImage", formData.AadharCardImage);
+    formToSend.append("ReporterProfile", formData.ReporterProfile);
+
     try {
-      const response = await register(formData).unwrap();
+      const response = await register(formToSend).unwrap();
       console.log("Registration Success:", response);
       navigate('/', { state: { message: response.message } });
     } catch (err) {
-      // <p>{}</p>
-      console.error("Registration Failed:", err.data.error);
+      console.error("Registration Failed:", err?.data?.error || err.message);
     }
   };
 
@@ -44,12 +59,13 @@ function SignUp() {
     navigate('/');
   };
 
-
   const isFormValid =
     formData.ReporterName.trim() !== '' &&
     formData.email.trim() !== '' &&
     formData.contactNo.length === 10 &&
-    formData.address.trim() !== '';
+    formData.address.trim() !== '' &&
+    formData.AadharCardImage !== null &&
+    formData.ReporterProfile !== null;
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen font-marathi">
@@ -72,6 +88,7 @@ function SignUp() {
         </h2>
 
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+          {/* Name */}
           <input
             type="text"
             name="ReporterName"
@@ -82,6 +99,7 @@ function SignUp() {
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
 
+          {/* Email */}
           <input
             type="email"
             name="email"
@@ -92,6 +110,7 @@ function SignUp() {
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
 
+          {/* Contact No */}
           <input
             type="text"
             name="contactNo"
@@ -104,6 +123,7 @@ function SignUp() {
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
 
+          {/* Address */}
           <input
             type="text"
             name="address"
@@ -114,7 +134,44 @@ function SignUp() {
             className="w-full h-12 px-4 border border-[#0F2248] rounded-full text-[#0F2248] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#0F2248]"
           />
 
-          <div className='flex justify-center'>
+          {/* Reporter Profile Image */}
+          <div className="w-full">
+            <label className="block mb-1 text-[#0F2248] font-medium">Reporter Profile Image</label>
+            <input
+              type="file"
+              name="ReporterProfile"
+              accept="image/*"
+              onChange={handleChange}
+              required
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-[#0F2248] file:text-white
+                hover:file:bg-[#0c1b3a]"
+            />
+          </div>
+
+          {/* Aadhar Card Image */}
+          <div className="w-full">
+            <label className="block mb-1 text-[#0F2248] font-medium">Aadhar Card Image</label>
+            <input
+              type="file"
+              name="AadharCardImage"
+              accept="image/*"
+              onChange={handleChange}
+              required
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-[#0F2248] file:text-white
+                hover:file:bg-[#0c1b3a]"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
             <button
               type="submit"
               disabled={isLoading || !isFormValid}
@@ -128,12 +185,14 @@ function SignUp() {
             </button>
           </div>
 
+          {/* Error */}
           {error && (
             <p className="text-red-600 text-sm text-center">
               {error?.data?.error}
             </p>
           )}
 
+          {/* Already have account */}
           <p className="cursor-pointer text-center">
             Already Have Account?
             <span
